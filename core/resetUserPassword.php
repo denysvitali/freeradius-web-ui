@@ -25,19 +25,21 @@ try {
 }
 
 require_once './includes/class.RandomPassword.php';
-$Password          = new RandomPassword();
-$plainTextPassword = $Password->getPassword();
+$password 					= (new RandomPassword())->getPassword();
+$salt		   					= (new RandomPassword())->getPassword();
 
 if ( $encryption == 'SHA-Password' ) {
-	$encryptedPassword = sha1( $plainTextPassword );
+	$encryptedPassword = sha1( $password );
 } else if ( $encryption == 'MD5-Password' ) {
-	$encryptedPassword = md5( $plainTextPassword );
+	$encryptedPassword = md5( $password );
+} else if ( $encryption == 'SSHA-Password') {
+	$encryptedPassword = base64_encode(sha1($password.$salt, true).$salt);
 } else {
 	$encryptedPassword = '';
 }
 
 if ( $encryptedPassword == '' ) {
-	echo 'EncryptionError';
+	echo json_encode(array("error"=>true, "msg"=>"Password encryption not matched, password will not be reset for user $username"));
 	exit;
 }
 
@@ -88,7 +90,7 @@ $emailHeading = 'Account Password Reset';
 $emailContent = "Hi $fullname,<br/><br/>
 				 Due to security, admin has reset your password for FreeRADIUS Server. To connect to FreeRadius server with new credentials use the following details.<br/><br/>
 				 Username: $username<br/>
-				 Password: $plainTextPassword<br/><br/>
+				 Password: $password<br/><br/>
 				 For other information you can contact admin at: <a href=\"mailto:$_SESSION[EMAIL]\">$_SESSION[EMAIL]</a><br/><br/>
 				 Thanks
 				";
@@ -241,26 +243,22 @@ $Mail->Body = "
 $resetPassword->execute();
 
 if ($resetPassword->rowCount() == 1) {
-	if ($Mail->send()) {
-		echo 'PasswordReset';
-		exit;
-	} else {
-		$lastPassword = $link->prepare("UPDATE radcheck SET password = :password WHERE username = :username");
-		$lastPassword->bindParam(':password',currentPassword(),PDO::PARAM_STR);
-		$lastPassword->bindParam(':username',$username,PDO::PARAM_STR);
-		$lastPassword->execute();
-		if ($lastPassword->rowCount() == 1) {
-			echo 'ErrorPasswordReset';
+	if ( $_SESSION['MAIL_SEND'] != 'enable' ) {
+			echo json_encode(array("error"=>false, "msg"=>"Password for user $username was successfully reset. His new password is \"$password\""));
+	}
+	else{
+		if ($Mail->send()) {
+			echo json_encode(array("error"=>false, "msg"=>"Password for user $username was successfully reset. An email has already been sent to user on his registered email address."));
 			exit;
 		} else {
-			echo 'Error';
-			exit;
+			$lastPassword = $link->prepare("UPDATE radcheck SET password = :password WHERE username = :username");
+			$lastPassword->bindParam(':password',currentPassword(),PDO::PARAM_STR);
+			$lastPassword->bindParam(':username',$username,PDO::PARAM_STR);
+			$lastPassword->execute();
+			echo json_encode(array("error"=>true, "msg"=>"Error while sending the reset password email to $username. Please try again later."));
 		}
 	}
 } else {
-	echo 'ErrorUpdatePassword';
+	echo json_encode(array("error"=>false, "msg"=>"Unable to reset $username's password. Please try again later."));
 	exit;
 }
-
-
-

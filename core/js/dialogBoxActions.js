@@ -99,45 +99,16 @@ function addNewUser() {
 				   async: true,
 				   data: data,
 				   success: function(response) {
-					   if ($.trim(response) == 'Empty') {
-						   info = 'All fields must be filled.';
+						 response = JSON.parse(response);
+						 console.log(response);
+					   if(response.error){
 						   addClass = 'text-danger';
 					   }
+						 else{
+							 addClass = 'text-info';
+						 }
 
-					   if ($.trim(response) == 'InvalidEmail') {
-						   info = 'Invalid email address.';
-						   addClass = 'text-danger';
-					   }
-
-					   if ($.trim(response) == 'UsernameRegistered') {
-						   info = 'Username already exists, please choose different username.';
-						   addClass = 'text-info';
-					   }
-
-					   if ($.trim(response) == 'EmailRegistered') {
-						   info = 'Email already exists.';
-						   addClass = 'text-info';
-					   }
-
-					   if ($.trim(response) == 'Error') {
-						   info = 'Error while adding the new user, please try again later.';
-						   addClass = 'text-danger';
-					   }
-
-					   if ($.trim(response) == 'Registered') {
-						   info = 'User added successfully.';
-						   addClass = 'text-success';
-					   }
-
-					   if ($.trim(response) == 'MailSent') {
-						   info = 'User added successfully.<br>Password sent to the user on ' + email;
-						   addClass = 'text-success';
-					   }
-
-					   if ($.trim(response) == 'EmailError') {
-						   info = 'Error while sending the email to the user on ' + email;
-						   addClass = 'text-info';
-					   }
+						 info = response.msg;
 
 					   $('#loading').removeClass(removeClass).addClass(addClass).html(info);
 					   $('#fullname').val('');

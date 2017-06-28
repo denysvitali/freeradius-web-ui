@@ -10,7 +10,7 @@ if ( $_SERVER['REQUEST_METHOD'] != 'POST' ) {
 }
 
 if ( empty( $_POST['fullname'] ) || empty( $_POST['username'] ) || empty( $_POST['passwordType'] ) || empty( $_POST['email'] ) ) {
-	echo 'Empty';
+	echo json_encode(array("error"=>true, "msg"=>"Empty request."));
 	exit;
 } else {
 	$fullname     = ucwords($_POST['fullname']);
@@ -19,9 +19,9 @@ if ( empty( $_POST['fullname'] ) || empty( $_POST['username'] ) || empty( $_POST
 	$passwordType = $_POST['passwordType'];
 	require_once 'includes/class.RandomPassword.php';
 
-	$op            = ':==';
-	$Password      = new RandomPassword();
-	$plainPassword = $Password->getPassword();
+	$op            	= ':=';
+	$plainPassword 	= (new RandomPassword())->getPassword();
+	$salt					 	= (new RandomPassword())->getPassword();
 
 	if ( $passwordType == 'MD5' ) {
 		$password  = md5( $plainPassword );
@@ -32,10 +32,15 @@ if ( empty( $_POST['fullname'] ) || empty( $_POST['username'] ) || empty( $_POST
 		$password  = sha1( $plainPassword );
 		$attribute = 'SHA-Password';
 	}
+
+	if ( $passwordType == "SSHA") {
+		$password	 = base64_encode(sha1($plainPassword.$salt, true).$salt);
+		$attribute = 'SSHA-Password';
+	}
 }
 
 if ( ! filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
-	echo 'InvalidEmail';
+	echo json_encode(array("error"=>true, "msg"=>"Invalid email."));
 	exit;
 }
 
@@ -51,7 +56,7 @@ $chkUserName = $link->prepare( 'SELECT * FROM radcheck WHERE username = :usernam
 $chkUserName->bindParam( ':username', $username );
 $chkUserName->execute();
 if ( $chkUserName->rowCount() == 1 ) {
-	echo 'UsernameRegistered';
+	echo json_encode(array("error"=>true, "msg"=>"This username is already being used. Select another username."));
 	exit;
 }
 
@@ -59,28 +64,34 @@ $chkEmail = $link->prepare( 'SELECT * FROM radcheck WHERE email = :email' );
 $chkEmail->bindParam( ':email', $email );
 $chkEmail->execute();
 if ( $chkEmail->rowCount() == 1 ) {
-	echo 'EmailRegistered';
+	echo json_encode(array("error"=>true, "msg"=>"This email is already associated with another account."));
 	exit;
 }
 
-$registerUser = $link->prepare( 'INSERT INTO radcheck(username, attribute, op, value, fullname, email)  VALUES(:username, :attribute, :op, :password,:fullname,:email)' );
+$groupName = "WebUI";
+$registerUser = $link->prepare( 'INSERT INTO radcheck(username, attribute, op, value) VALUES(:username, :attribute, :op, :password)' );
 
 $registerUser->bindParam( ':username', $username );
 $registerUser->bindParam( ':attribute', $attribute );
 $registerUser->bindParam( ':op', $op );
 $registerUser->bindParam( ':password', $password );
-$registerUser->bindParam( ':fullname', $fullname );
-$registerUser->bindParam( ':email', $email );
 
 $registerUser->execute();
 
 if ( $registerUser->rowCount() != 1 ) {
-	echo 'Error';
+	echo json_encode(array("error"=>true, "msg"=>"Unable to register the user. Retry again later."));
 	exit;
 }
 
+$registerUser = $link->prepare( 'INSERT INTO radaccounts (username, fullname, email, groupname) VALUES (:username, :fullname, :email, :groupname)' );
+$registerUser->bindParam( ':username', $username );
+$registerUser->bindParam( ':fullname', $fullname );
+$registerUser->bindParam( ':email', $email );
+$registerUser->bindParam( ':groupname', $groupName );
+$registerUser->execute();
+
 if ( $_SESSION['MAIL_SEND'] != 'enable' ) {
-	echo 'Registered';
+	echo json_encode(array("error"=>false, "msg"=>"User succesfully registered, its password is ".$plainPassword));
 	exit;
 }
 
@@ -248,9 +259,9 @@ $Mail->Body = "
 ";
 
 if ( $Mail->send() ) {
-	echo 'MailSent';
+	json_encode(array("error"=>false, "msg"=>"Email sent!"));
 	exit;
 } else {
-	echo 'EmailError';
+	json_encode(array("error"=>true, "msg"=>"Unable to send registration email."));
 	exit;
 }

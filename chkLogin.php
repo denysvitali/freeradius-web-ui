@@ -50,7 +50,7 @@ $_SESSION['USERNAME']    = $adminInfo['username'];
 $_SESSION['EMAIL']       = $adminInfo['email'];
 $_SESSION['FULLNAME']    = $adminInfo['fullname'];
 $_SESSION['SITE_NAME']   = getSetting('site_name');
-$_SESSION['PRODUCT_URL'] = getSetting('product_url');
+$_SESSION['PRODUCT_URL'] = '/';
 $_SESSION['ADMIN']       = true;
 
 $_SESSION['MAIL_SEND'] = getSetting('mail_send');

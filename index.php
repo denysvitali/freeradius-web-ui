@@ -21,7 +21,7 @@ if ( isset( $_SESSION['ADMIN'] ) ) {
 		exit;
 	}
 	require_once 'includes/functions.php';
-	$GetURL   = getSetting( 'product_url' );
+	$GetURL   = '/';
 	$SiteName = getSetting( 'site_name' );
 	session_start();
 	$_SESSION['PRODUCT_URL'] = $GetURL;

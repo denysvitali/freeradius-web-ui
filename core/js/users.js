@@ -6,12 +6,12 @@ function notification(heading, message) {
 	$.Notify({
 		caption: heading,
 		content: message,
-		timeout: 5000,
+		timeout: 15000,
 		width: '10',
 		style: {
-			background: '#333333', color: '#ffffff'
+			background: '#333333FA', color: '#ffffff'
 		}
-			 });
+	});
 }
 
 function loadUsersList(pageNum) {
@@ -165,9 +165,7 @@ function enableDisableUserAccount(id, username, statusTo) {
 
 				   notification(heading, message);
 
-				   setTimeout(function() {
-					   $('#loadUsers').fadeOut('slow').load(loadUsersList(currentPage)).fadeIn('slow');
-				   }, 500);
+				   $('#loadUsers').load(loadUsersList(currentPage));
 			   }
 
 		   });
@@ -222,25 +220,15 @@ function resetUserAccountPassword(id, username, encryption) {
 			   url: 'resetUserPassword.php',
 			   async: true,
 			   success: function(response) {
-				   if ($.trim(response) == 'EncryptionError') {
-					   heading = 'Error!';
-					   message = 'Password encryption not matched, password will not be reset for user ' + username;
-				   }
+					 response = JSON.parse(response);
 
-				   if ($.trim(response) == 'PasswordReset') {
-					   heading = 'Success!';
-					   message = 'Password for user ' + username + ' is successfully reset. Email has already been sent to user on his/her registered email address.';
-				   }
+					 if(response.error){
+						 heading = 'Error!';
+					 } else {
+						 heading = 'Success!';
+					 }
 
-				   if ($.trim(response) == 'ErrorPasswordReset' || $.trim(response) == 'ErrorUpdatePassword') {
-					   heading = 'Error!';
-					   message = 'Error while resetting password for user ' + username + '. Please try again after sometime.';
-				   }
-
-				   if ($.trim(response) == 'Error') {
-					   heading = 'Error!';
-					   message = 'Something went wrong while resetting password for user ' + username + '. Might be user will not able to access the server. Please look into the matter urgently';
-				   }
+					 message = response.msg;
 
 				   notification(heading, message);
 

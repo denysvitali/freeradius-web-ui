@@ -90,6 +90,14 @@ function addNewUserDialog() {
 				 '</label>' +
 				 '</div>' +
 
+				 '<div class="input-control radio margin5">' +
+				 '<label>' +
+				 '<input type="radio" class="" name="passwordType" value="SSHA"/>' +
+				 '<span class="check"></span>' +
+				 'SSHA' +
+				 '</label>' +
+				 '</div>' +
+
 				 '<div class="place-right" style="margin-bottom: 30px;">' +
 				 '<button class="button" type="button" onclick="$.Dialog.close()">Cancel</button> ' +
 				 '<button class="button dark" onclick="javascript:addNewUser();">Add</button> ' +

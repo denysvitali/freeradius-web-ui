@@ -6,7 +6,7 @@ if ( preg_match( "/chkApplication.php/", $_SERVER['SCRIPT_NAME'] ) ) {
 ?>
 
 <?php
-
+if(false){
 if ( GetProductURL() != getSetting( 'product_url' ) ) {
 	?>
 
@@ -35,4 +35,5 @@ if ( GetProductURL() != getSetting( 'product_url' ) ) {
 <?php
 	require 'footer.php';
 	exit;
+}
 }

@@ -42,6 +42,7 @@ function StripTrailingSlash($_URL)
 
 function GetProductURL($currentDir = '')
 {
+	return '/';
 	$_isHTTPS = false;
 	if(isset($_SERVER['HTTPS']) && (intval($_SERVER['HTTPS']) || strtolower($_SERVER['HTTPS']) == 'on'))
 	{

@@ -27,8 +27,7 @@ if ( isset( $_POST['page'] ) ) {
 $recordPerPage = 10;
 $startPage     = ( $page - 1 ) * $recordPerPage;
 
-$loadUsersQuery = "SELECT rc.id, rc.username, rc.attribute, rc.fullname, rc.email, rug.groupname FROM radcheck rc LEFT OUTER JOIN radusergroup rug ON(rc.username = rug.username) ORDER BY id DESC  LIMIT $startPage, $recordPerPage";
-
+$loadUsersQuery = "SELECT rc.id, rc.username, rc.attribute, racc.fullname, racc.email, rug.groupname FROM radcheck rc LEFT OUTER JOIN radaccounts racc ON (rc.username=racc.username) LEFT OUTER JOIN radusergroup rug ON rc.username=rug.username ORDER BY rc.username, racc.fullname DESC OFFSET ".$startPage." LIMIT $recordPerPage";
 $loadUsers = $link->prepare( $loadUsersQuery );
 $loadUsers->execute();
 
