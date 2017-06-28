@@ -20,7 +20,7 @@ if ( empty( $_POST['dbHost'] ) || empty( $_POST['dbUser'] ) || empty( $_POST['db
 }
 
 try {
-	$link = new PDO( "mysql:host=$dbHost", $dbUser, $dbPass );
+	$link = new PDO( "pgsql:host=$dbHost", $dbUser, $dbPass );
 } catch ( PDOException $Exception ) {
 	echo 'Invalid';
 }
@@ -62,7 +62,7 @@ if ( preg_match( '/config.php/', \$_SERVER['SCRIPT_NAME'] ) ) {
 	exit;
 }
 ?>";
-		$configuration .= "\n<?php\n\ndefine( 'RAD_DB_DRIVER', 'mysql' );\n\ndefine( 'RAD_DB_HOST', '$dbHost' );\n\ndefine( 'RAD_DB_NAME', '$dbName' );\n\ndefine( 'RAD_DB_USER', '$dbUser' );\n\ndefine( 'RAD_DB_PASS', '$dbPass' );\n\n?>";
+		$configuration .= "\n<?php\n\ndefine( 'RAD_DB_DRIVER', 'pgsql' );\n\ndefine( 'RAD_DB_HOST', '$dbHost' );\n\ndefine( 'RAD_DB_NAME', '$dbName' );\n\ndefine( 'RAD_DB_USER', '$dbUser' );\n\ndefine( 'RAD_DB_PASS', '$dbPass' );\n\n?>";
 		$handler       = fopen( '../includes/config.php', 'w' );
 		fwrite( $handler, $configuration );
 		fclose( $handler );
@@ -75,14 +75,17 @@ if ( preg_match( '/config.php/', \$_SERVER['SCRIPT_NAME'] ) ) {
  * check database exists
  */
 
-$checkDatabase = $link->prepare( "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname" );
-$checkDatabase->bindParam( ':dbname', $dbName, PDO::PARAM_STR );
-$checkDatabase->execute();
+#$checkDatabase = $link->prepare( "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :dbname" );
+#$checkDatabase->bindParam( ':dbname', $dbName, PDO::PARAM_STR );
+#$checkDatabase->execute();
+#
+#if ( $checkDatabase->rowCount() == 1 ) {
+#	echo 'dbExists';
+#	exit;
+#} else {
+#	echo 'dbNotExists';
+#	exit;
+#}
 
-if ( $checkDatabase->rowCount() == 1 ) {
-	echo 'dbExists';
-	exit;
-} else {
-	echo 'dbNotExists';
-	exit;
-}
+echo 'dbExists';
+exit;
